@@ -2,6 +2,7 @@ package pkgLogic;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.HashMap;
 
 import org.apache.poi.ss.formula.functions.FinanceLib;
 
@@ -14,12 +15,30 @@ public class Loan {
 	private LocalDate StartDate;
 	private double AdditionalPayment;
 	private double Escrow;
+	
+	private HashMap<Integer,Double> hmRates = new HashMap<Integer,Double>();
 
 	private ArrayList<Payment> loanPayments = new ArrayList<Payment>();
 
 	public Loan(double loanAmount, double interestRate, int loanPaymentCnt, LocalDate startDate,
-			double additionalPayment, double escrow) {
+			double additionalPayment, double escrow
+			,int AdjustLockTime, int AdjustLoanMonths, double AdjustLoanRate) {
 		super();
+		
+		double tmpInterestRate = interestRate;
+		int tmpAdjustLockTime = AdjustLockTime;
+		for(int i =1; i <= loanPaymentCnt; i++) {
+			if((AdjustLoanMonths !=0) && (AdjustLoanRate !=0)) {
+				if(i > (tmpAdjustLockTime * 12)) {
+					tmpInterestRate += AdjustLoanRate;
+					tmpAdjustLockTime += AdjustLoanMonths;
+				}
+			}
+			
+			hmRates.put(i,  tmpInterestRate);
+		}
+		
+		
 		LoanAmount = loanAmount;
 		InterestRate = interestRate;
 		LoanPaymentCnt = loanPaymentCnt * 12;
@@ -31,7 +50,13 @@ public class Loan {
 
 		double RemainingBalance = LoanAmount;
 		int PaymentCnt = 1;
-		
+		while(RemainingBalance >= this.GetPMT() + this.AdditionalPayment) {
+			InterestRate = this.getInterestRate(PaymentCnt);
+			Payment payment = new Payment(RemainingBalance, PaymentCnt++, startDate,);
+			RemainingBalance = payment.getEndingBalance();
+			startDate = startDate.plusMonths(1);
+			loanPayments.add(payment);
+		}
 		//TODO: Create a payment until 'remaining balance' is < PMT + Additional Payment
 		//		Hint: use while loop
 
@@ -82,8 +107,10 @@ public class Loan {
 		LoanBalanceEnd = loanBalanceEnd;
 	}
 
-	public double getInterestRate() {
-		return InterestRate;
+	public double getInterestRate(int PaymentNbr) {
+		
+		return this.hmRates.get(PaymentNbr);
+		
 	}
 
 	public void setInterestRate(double interestRate) {

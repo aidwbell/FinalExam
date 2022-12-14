@@ -92,6 +92,15 @@ public class LoanCalcViewController implements Initializable {
 	
 	@FXML
 	private Label lblTotalEscrow;
+	
+	@FXML
+	private TextField txtAdjustLockTime;
+	
+	@FXML
+	private TextField txtAdjustLoanMonths;
+	
+	@FXML
+	private TextField txtAdjustLoanRate;
 
 	@FXML
 	private TableView<Payment> tvResults;
@@ -208,6 +217,18 @@ public class LoanCalcViewController implements Initializable {
 		EscrowAmount.setVisible((strLoanType == "Home"));
 		lblEscrow.setVisible((strLoanType == "Home"));
 	}
+	
+	@FXML
+	private void btnSetDefualtAdjustmentParms(KeyEvent event) {
+		
+		txtAdjustLockTime.setText(this.NbrOfYears.getText());
+		txtAdjustLoanMonths.setText("");
+		txtAdjustLoanRate.setText("");
+
+		
+		this.btnClearResultsKeyPress(event);
+
+	}
 
 	@FXML
 	private void btnClearResultsKeyPress(KeyEvent event) {
@@ -291,8 +312,15 @@ public class LoanCalcViewController implements Initializable {
 		double dEscrow = (this.EscrowAmount.getText().isEmpty() ? 0 : Double.parseDouble(this.EscrowAmount.getText()));
 		LocalDate localDate = PaymentStartDate.getValue();
 
-		Loan loanExtra = new Loan(dLoanAmount, dInterestRate, dNbrOfYears, localDate, dAdditionalPayment, dEscrow);
-		Loan loanNoExtra = new Loan(dLoanAmount, dInterestRate, dNbrOfYears, localDate, 0, dEscrow);
+		int iAdjustLockTime = Integer.parseInt(this.txtAdjustLockTime.getText());
+		int iAdjustLoanMonths = this.txtAdjustLoanMonths.getText() == ""? 0 
+				:Integer.parseInt(this.txtAdjustLoanMonths.getText());
+		double dAdjustLoanRate = Double.parseDouble(this.txtAdjustLoanRate.getText());
+		
+		
+		
+		Loan loanExtra = new Loan(dLoanAmount, dInterestRate, dNbrOfYears, localDate, dAdditionalPayment, dEscrow, iAdjustLockTime, iAdjustLoanMonths, dAdjustLoanRate);
+		Loan loanNoExtra = new Loan(dLoanAmount, dInterestRate, dNbrOfYears, localDate, 0, dEscrow,iAdjustLockTime, iAdjustLoanMonths, dAdjustLoanRate);
 
 		for (Payment p : loanExtra.getLoanPayments()) {
 			paymentList.add(p);

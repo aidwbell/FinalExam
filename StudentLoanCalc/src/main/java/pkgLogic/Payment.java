@@ -33,7 +33,7 @@ public class Payment {
 		this.PaymentNbr = paymentNbr;
 		this.EscrowPayment = loan.getEscrow();
 		this.DueDate = dueDate;
-		this.InterestPayment = beginningBalance * (loan.getInterestRate() / 12);
+		this.InterestPayment = beginningBalance * (loan.getInterestRate(PaymentNbr) / 12);
 
 		if (bLastPayment) {
 			this.Payment = beginningBalance;// + (beginningBalance * (loan.getInterestRate() / 12));
